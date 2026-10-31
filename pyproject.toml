@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "form-auditor"
+version = "1.0.0"
+description = "Education-only CLI for auditing healthcare admin forms locally (JSON storage, CSV export, printable reports)."
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [{name = "Asdale Dynamics, LLC", email = "dylanasdale@users.noreply.github.com"}]
+license = {file = "LICENSE"}
+keywords = ["healthcare", "admin", "audit", "cli", "local-first", "education"]
+
+[project.scripts]
+form-auditor = "form_auditor.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["form_auditor*"]
