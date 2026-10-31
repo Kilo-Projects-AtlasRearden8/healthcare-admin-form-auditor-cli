@@ -1,46 +1,65 @@
 # Healthcare Admin Form Auditor CLI
 
-A small, local-first Python CLI that checks healthcare administrative forms for
-missing required fields, deadline dates, and overall completeness. Stores data
-in local JSON files, exports to CSV, and prints a plain-text audit report.
+A small, local-first Python CLI that helps you check healthcare administrative
+forms for missing required fields, deadline dates, and overall completeness.
+
+It stores everything in local JSON files, can export your results to CSV, and
+prints a plain-text audit report you can read or print.
 
 Built by **Asdale Dynamics, LLC** (Dylan Asdale, Indiana) as an education-only
 accessibility tool for healthcare paperwork organization.
 
-## Education-only - not medical advice
+## Important: education only — not medical advice
 
 This tool is for educational and administrative organization purposes only.
 
 It is **not medical advice**, not a diagnosis or treatment tool, and not a
-substitute for professional medical judgment, your facility's policies, or
-review by a qualified healthcare administrator, compliance officer, or
-attorney. Always follow applicable law (such as HIPAA in the United States)
-and your organization's procedures when handling healthcare paperwork.
+substitute for professional medical judgment. Always follow your facility's
+policies, applicable law (such as HIPAA in the United States), and the guidance
+of a qualified healthcare administrator, compliance officer, or attorney when
+handling healthcare paperwork.
 
-## Local-first
+By using this tool you acknowledge that Asdale Dynamics, LLC provides it "as
+is" for education only, with no warranties of any kind.
 
-Everything stays on your machine:
+## Local-first — your data stays on your machine
 
-* Form templates, submissions, and audits are stored as JSON files in a local
+Everything this tool does happens on your own computer:
+
+* Form templates, submissions, and audits are saved as JSON files in a local
   data directory (default: `data/`).
 * Nothing is sent over the network. No cloud accounts, no API keys, no
-  telemetry.
+  telemetry, no third-party services.
 * You own and control all of the data.
 
-Do not enter real patient identifiers or protected health information unless
-your facility's policies permit it and you are managing the file securely.
+Please do not enter real patient identifiers or protected health information
+unless your facility's policies permit it and you are managing the file
+securely.
+
+## What it checks
+
+For each form submission, the auditor looks at:
+
+* **Missing required fields** — fields your form template marks as required
+  that are blank or not provided.
+* **Deadline dates** — whether a deadline is met, approaching (within 7 days),
+  overdue, missing, or not a valid date.
+* **Completeness** — a percentage showing how many of the defined fields on the
+  form have been filled in.
 
 ## Features
 
-* Checks for **missing required fields** on a form template
-* Checks **deadline dates** (met / approaching / overdue / no deadline)
-* Computes a **completeness percentage** (share of defined fields filled in)
-* Local **JSON storage** for templates, submissions, and audit results
-* **CSV export** of all audits
-* Printable **plain-text audit report**
+* Checks for missing required fields on a form template
+* Checks deadline dates (met / approaching / overdue / no deadline / invalid)
+* Computes a completeness percentage
+* Local JSON storage for templates, submissions, and audit results
+* CSV export of all audits
+* Printable plain-text audit report
 * Education-only disclaimer shown on every run
 
 ## Install
+
+You'll need Python 3.9 or newer.
 
 ```bash
 cd healthcare-admin-form-auditor-cli
@@ -49,75 +68,99 @@ source .venv/bin/activate
 pip install -e .
 ```
 
-## Usage
+This installs the `form-auditor` command so you can run it from anywhere.
 
-Initialize sample data:
+## Usage, step by step
+
+### 1. Create sample data
+
+If you just want to see how the tool works, create some sample forms and a
+sample submission:
 
 ```bash
 form-auditor init
 ```
 
-Audit a submission (JSON file) against a stored template:
+This makes a `data/` folder with one form template ("Patient Intake Form"),
+one example submission, and one example audit result.
 
-```bash
-form-auditor check submissions/patient-intake-example.json
-```
+### 2. Audit a submission
 
-List stored audits:
-
-```bash
-form-auditor list
-```
-
-Export all audits to CSV:
-
-```bash
-form-auditor export audits.csv
-```
-
-Print a stored audit report:
-
-```bash
-form-auditor report AUD-...
-```
-
-Save a report to a file:
-
-```bash
-form-auditor check submissions/x.json --out report.txt
-```
-
-### Data file example (submission)
+A submission is a JSON file describing a filled-in form. Here's an example:
 
 ```json
 {
-  "submission_id": "SUB-1700000000",
+  "submission_id": "SUB-1",
   "form_id": "patient-intake-001",
   "form_name": "Patient Intake Form",
-  "deadline": "2026-11-15",
+  "deadline": "2026-12-01",
   "values": {
-    "patient_reference": "PAT-EXAMPLE",
-    "date_of_birth": "1980-05-12",
-    "insurance_provider": "Example Health",
-    "insurance_member_id": "M123456",
-    "emergency_contact_name": "",
-    "emergency_contact_phone": ""
+    "patient_reference": "PAT-9",
+    "date_of_birth": "1975-03-04",
+    "insurance_provider": "Blue Cross",
+    "insurance_member_id": "X99",
+    "emergency_contact_name": "J. Doe",
+    "emergency_contact_phone": "555-0100",
+    "allergies": "none"
   },
   "submitted_by": "clerk-example"
 }
 ```
 
-`deadline` is optional and uses ISO format (`YYYY-MM-DD`). Empty strings count
-as missing required fields.
+Save that to a file (for example `submission.json`), then run:
 
-## Tests
+```bash
+form-auditor check submission.json
+```
+
+The tool prints the education-only disclaimer, then a readable audit report
+telling you what's missing, what the deadline status is, and the completeness
+score.
+
+To save the report to a file as well:
+
+```bash
+form-auditor check submission.json --out audit-report.txt
+```
+
+### 3. List your audits
+
+See every audit you've run so far:
+
+```bash
+form-auditor list
+```
+
+### 4. Export to CSV
+
+Save all audits to a CSV file you can open in a spreadsheet:
+
+```bash
+form-auditor export audits.csv
+```
+
+### 5. Reprint a past report
+
+```bash
+form-auditor report <audit-id>
+```
+
+Replace `<audit-id>` with an ID from `form-auditor list`.
+
+### Data format notes
+
+* `deadline` is optional. When included, use ISO format: `YYYY-MM-DD`.
+* Empty strings count as missing required fields.
+* A value of `0` or `false` counts as filled in (it's a deliberate answer).
+
+## Run the tests
 
 ```bash
 pytest
 ```
 
-Tests cover field logic: missing required fields, empty optional fields,
-deadline classification, and completeness scoring.
+Tests cover missing required fields, empty optional fields, deadline
+classification, and completeness scoring.
 
 ## License
 
@@ -133,7 +176,7 @@ dylanasdale.github.io and in *The Massive AI Manual*.
 ## About the author
 
 Dylan Asdale is a registered nurse turned AI author and founder of Asdale
-Dynamics, LLC. He explains AI "like a friend would": plain English, step by
+Dynamics, LLC. He explains things "like a friend would": plain English, step by
 step, never condescending. The LLC's focus includes healthcare-worker AI aids
 (education only, never medical advice), accessible life-admin helpers, and
 practical open-source tools.

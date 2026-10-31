@@ -95,7 +95,6 @@ def cmd_check(args: argparse.Namespace) -> int:
     result = audit_submission(submission, template)
     storage.save_submission(submission)
     storage.save_audit(result)
-    print_disclaimer()
     print(build_report(result))
     if args.out:
         Path(args.out).write_text(build_report(result))
@@ -105,7 +104,6 @@ def cmd_check(args: argparse.Namespace) -> int:
 
 def cmd_list(args: argparse.Namespace) -> int:
     storage = JsonStorage(args.data_dir)
-    print_disclaimer()
     audits = storage.list_audits()
     if not audits:
         print("No audits stored yet. Run 'form-auditor check ...' first.")
@@ -125,7 +123,6 @@ def cmd_export(args: argparse.Namespace) -> int:
     storage = JsonStorage(args.data_dir)
     audits = storage.list_audits()
     header = export_csv(audits, args.output)
-    print_disclaimer()
     print(f"Exported {len(audits)} audit(s) to {args.output}")
     print("Columns: " + ", ".join(header))
     return 0
@@ -137,7 +134,6 @@ def cmd_report(args: argparse.Namespace) -> int:
     if result is None:
         print(f"Error: audit '{args.audit_id}' not found.", file=sys.stderr)
         return 2
-    print_disclaimer()
     text = build_report(result)
     print(text)
     if args.out:

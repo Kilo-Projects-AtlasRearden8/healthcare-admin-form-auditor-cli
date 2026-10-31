@@ -134,7 +134,7 @@ class AuditResult:
     deadline_message: str = ""
     completeness: float = 0.0  # 0.0 to 100.0
     issues: list[AuditIssue] = field(default_factory=list)
-    audited_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+    audited_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
     @property
     def passed(self) -> bool:
